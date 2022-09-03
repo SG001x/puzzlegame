@@ -1,6 +1,7 @@
 package com.musa.ui;
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
 import java.util.Random;
 
 //创建二维数组
@@ -42,10 +43,10 @@ public class GameJFrame extends JFrame {
             tempArr[index] = temp;
 
         }
-        for (int i = 0; i < tempArr.length; i++) {
-            System.out.print(tempArr[i] + " ");
-        }
-        System.out.println("");
+//        for (int i = 0; i < tempArr.length; i++) {
+//            System.out.print(tempArr[i] + " ");
+//        }
+//        System.out.println("");
 
         //解法二：
         //遍历二维数组，给里面的每一个数据赋值
@@ -58,18 +59,31 @@ public class GameJFrame extends JFrame {
     }
 
     //初始化图片
-    // 添加图片的十号，就需要按照二维数组中管理的数据添加图片
+    // 添加图片的时候，就需要按照二维数组中管理的数据添加图片
     private void initImage() {
+        //路径分为两种：
+        // 绝对路径：一定是从盘符开始的
+        // 相对路径：相对当前项目而言的
+        // 实际开发时推荐写相对路径，因为相对路径在整个项目文件迁移至别的盘符、主机上时不会出错。
+
+
+        //细节：
+        // 先加载的图片在上方，后加图片在下。
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 //获取当前要加载的图片序号
                 int num = data[i][j];
                 //创建一个图片ImageIcon的对象
-                ImageIcon icon = new ImageIcon("C:\\Users\\SG001x\\IdeaProjects\\puzzlegame\\image\\animal\\animal3\\" + num + ".jpg");
+                ImageIcon icon = new ImageIcon("puzzlegame\\image\\animal\\animal3\\" + num + ".jpg");
                 //创建一个JLable的对象（管理容器）
                 JLabel jLabel = new JLabel(icon);
                 //指定图片位置
-                jLabel.setBounds(105 * j, 105 * i, 105, 105);
+                jLabel.setBounds(105 * j + 83, 105 * i + 134, 105, 105);
+                //给图片添加边框
+                //0 (== BevelBorder.RAISED):表示让图片凸起来
+                //1 (== BevelBorder.LOWERED):表示让图片凹下去。
+                jLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+
                 //getContentPane获取隐藏容器，再把管理容器添加到界面中
                 //this.add(jLabel);
                 this.getContentPane().add(jLabel);
@@ -77,6 +91,16 @@ public class GameJFrame extends JFrame {
             }
         }
 
+        //添加背景图片
+        JLabel gameGoard = new JLabel(new ImageIcon("puzzlegame\\image\\background.png"));
+        gameGoard.setBounds(40,40,508,560);
+        //把背景图片添加到界面当中
+        this.getContentPane().add(gameGoard);
+
+        JLabel background = new JLabel(new ImageIcon("puzzlegame\\image\\木材质背景.jpg"));
+        background.setBounds(0,0,603,680);
+        //把背景图片添加到界面当中
+        this.getContentPane().add(background);
     }
 
 
