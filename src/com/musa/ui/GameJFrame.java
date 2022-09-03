@@ -2,6 +2,8 @@ package com.musa.ui;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.Random;
 
 //创建二维数组
@@ -9,9 +11,13 @@ import java.util.Random;
 //加载图片的时候，会根据二维数组中的数据进行加载
 
 
-public class GameJFrame extends JFrame {
+public class GameJFrame extends JFrame implements KeyListener {
     // 规定：GameJFrame代表游戏主界面
     int[][] data = new int[4][4];
+
+    //x，y记录空白方块在二维数组中的位置
+    int x = 0;
+    int y = 0;
 
     public GameJFrame() {
         //初始化界面
@@ -32,6 +38,8 @@ public class GameJFrame extends JFrame {
         this.setVisible(true);
     }
 
+
+    //初始化数据（打乱）
     private void initData() {
         int[] tempArr = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
         for (int i = 0; i < tempArr.length; i++) {
@@ -43,17 +51,19 @@ public class GameJFrame extends JFrame {
             tempArr[index] = temp;
 
         }
-//        for (int i = 0; i < tempArr.length; i++) {
-//            System.out.print(tempArr[i] + " ");
-//        }
-//        System.out.println("");
 
         //解法二：
         //遍历二维数组，给里面的每一个数据赋值
 
         for (int i = 0; i < data.length; i++) {
             for (int j = 0; j < data[i].length; j++) {
-                data[i][j] = tempArr[i * 4 + j];
+                if (tempArr[i * 4 + j] == 0) {
+                    x = i;
+                    y = j;
+                } else {
+                    data[i][j] = tempArr[i * 4 + j];
+
+                }
             }
         }
     }
@@ -66,9 +76,11 @@ public class GameJFrame extends JFrame {
         // 相对路径：相对当前项目而言的
         // 实际开发时推荐写相对路径，因为相对路径在整个项目文件迁移至别的盘符、主机上时不会出错。
 
-
         //细节：
         // 先加载的图片在上方，后加图片在下。
+
+        //清空已有图像
+        this.getContentPane().removeAll();
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 //获取当前要加载的图片序号
@@ -93,14 +105,17 @@ public class GameJFrame extends JFrame {
 
         //添加背景图片
         JLabel gameGoard = new JLabel(new ImageIcon("puzzlegame\\image\\background.png"));
-        gameGoard.setBounds(40,40,508,560);
+        gameGoard.setBounds(40, 40, 508, 560);
         //把背景图片添加到界面当中
         this.getContentPane().add(gameGoard);
 
         JLabel background = new JLabel(new ImageIcon("puzzlegame\\image\\木材质背景.jpg"));
-        background.setBounds(0,0,603,680);
+        background.setBounds(0, 0, 603, 680);
         //把背景图片添加到界面当中
         this.getContentPane().add(background);
+
+        //刷新背景图片
+        this.getContentPane().repaint();
     }
 
 
@@ -151,5 +166,69 @@ public class GameJFrame extends JFrame {
 
         //取消默认居中放置，取消之后才能按照xy轴的形式添加组件
         this.setLayout(null);
+
+        //给整个界面添加键盘监听事件
+        this.addKeyListener(this);
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        //对上下左右进行判断
+        //左：37   上：38   右：39   下：40。
+        int code = e.getKeyCode();
+        //逻辑：
+        // 通过方位键将空白方块反方向的方块往空白方向移动，方位键的方向即移动方向。
+        if (code == 37) {
+            if(y == 3){
+                //空白方块抵达右边界
+                return;
+            }
+            //向左移动
+            data[x][y] = data[x][y + 1];
+            data[x][y + 1] = 0;
+            y++;
+            initImage();
+        } else if (code == 38) {
+            if(x == 3){
+                //空白方块抵达下边界
+                return;
+            }
+            //向上移动
+            data[x][y] = data[x + 1][y];
+            data[x + 1][y] = 0;
+            x++;
+            //调用方法按照最新的数字加载图片
+            initImage();
+        } else if (code == 39) {
+            if(y == 0){
+                //空白方块抵达左边界
+                return;
+            }
+            //向右移动
+            data[x][y] = data[x][y - 1];
+            data[x][y - 1] = 0;
+            y--;
+            initImage();
+        } else if (code == 40) {
+            if(x == 0){
+                //空白方块抵达上边界
+                return;
+            }
+            //向下移动
+            data[x][y] = data[x - 1][y];
+            data[x - 1][y] = 0;
+            x--;
+            initImage();
+        }
     }
 }
