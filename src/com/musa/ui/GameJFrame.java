@@ -1,5 +1,7 @@
 package com.musa.ui;
 
+import com.sun.jdi.PathSearchingVirtualMachine;
+
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import java.awt.event.KeyEvent;
@@ -10,7 +12,6 @@ import java.util.Random;
 //目的：用于管理数据
 //加载图片的时候，会根据二维数组中的数据进行加载
 
-
 public class GameJFrame extends JFrame implements KeyListener {
     // 规定：GameJFrame代表游戏主界面
     int[][] data = new int[4][4];
@@ -18,6 +19,21 @@ public class GameJFrame extends JFrame implements KeyListener {
     //x，y记录空白方块在二维数组中的位置
     int x = 0;
     int y = 0;
+
+    //定义一个变量，记录当前展示图片的路径
+    String path = "puzzlegame\\image\\animal\\animal3\\";
+
+    //定义一个二维数组，存储正确的数据
+    int[][] win = {
+            {1, 2, 3, 4},
+            {5, 6, 7, 8},
+            {9, 10, 11, 12},
+            {13, 14, 15, 0}
+    };
+
+
+    //定义变量用来统计步数
+    int step = 0;
 
     public GameJFrame() {
         //初始化界面
@@ -81,12 +97,21 @@ public class GameJFrame extends JFrame implements KeyListener {
 
         //清空已有图像
         this.getContentPane().removeAll();
+
+        if (victory()) {
+            //显示胜利图标
+            JLabel winJLabel = new JLabel(new ImageIcon("C:\\Users\\SG001x\\IdeaProjects\\puzzlegame\\image\\win.png"));
+            winJLabel.setBounds(203, 283, 197, 73);
+            this.getContentPane().add(winJLabel);
+        }
+
+
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 //获取当前要加载的图片序号
                 int num = data[i][j];
                 //创建一个图片ImageIcon的对象
-                ImageIcon icon = new ImageIcon("puzzlegame\\image\\animal\\animal3\\" + num + ".jpg");
+                ImageIcon icon = new ImageIcon(path + num + ".jpg");
                 //创建一个JLable的对象（管理容器）
                 JLabel jLabel = new JLabel(icon);
                 //指定图片位置
@@ -176,20 +201,50 @@ public class GameJFrame extends JFrame implements KeyListener {
 
     }
 
+    //按下不松时会调用这个方法
     @Override
     public void keyPressed(KeyEvent e) {
+        int code = e.getKeyCode();
+        if (code == 65) {
+            //把界面中的图片删除
+            this.getContentPane().removeAll();
+            //加载第一张完整的图片
+            JLabel all = new JLabel(new ImageIcon(path + "all.jpg"));
+            all.setBounds(83, 134, 420, 420);
+            this.getContentPane().add(all);
 
+
+            //加载背景图片
+            JLabel gameGoard = new JLabel(new ImageIcon("puzzlegame\\image\\background.png"));
+            gameGoard.setBounds(40, 40, 508, 560);
+            //把背景图片添加到界面当中
+            this.getContentPane().add(gameGoard);
+
+            JLabel background = new JLabel(new ImageIcon("puzzlegame\\image\\木材质背景.jpg"));
+            background.setBounds(0, 0, 603, 680);
+            //把背景图片添加到界面当中
+            this.getContentPane().add(background);
+
+
+            //刷新背景图片
+            this.getContentPane().repaint();
+        }
     }
 
+    //松开按键时会调用这个方法
     @Override
     public void keyReleased(KeyEvent e) {
+        //判断游戏是否胜利，胜利则方法结束，限制移动
+        if (victory()) {
+            return;
+        }
         //对上下左右进行判断
         //左：37   上：38   右：39   下：40。
         int code = e.getKeyCode();
         //逻辑：
         // 通过方位键将空白方块反方向的方块往空白方向移动，方位键的方向即移动方向。
         if (code == 37) {
-            if(y == 3){
+            if (y == 3) {
                 //空白方块抵达右边界
                 return;
             }
@@ -199,7 +254,7 @@ public class GameJFrame extends JFrame implements KeyListener {
             y++;
             initImage();
         } else if (code == 38) {
-            if(x == 3){
+            if (x == 3) {
                 //空白方块抵达下边界
                 return;
             }
@@ -210,7 +265,7 @@ public class GameJFrame extends JFrame implements KeyListener {
             //调用方法按照最新的数字加载图片
             initImage();
         } else if (code == 39) {
-            if(y == 0){
+            if (y == 0) {
                 //空白方块抵达左边界
                 return;
             }
@@ -220,7 +275,7 @@ public class GameJFrame extends JFrame implements KeyListener {
             y--;
             initImage();
         } else if (code == 40) {
-            if(x == 0){
+            if (x == 0) {
                 //空白方块抵达上边界
                 return;
             }
@@ -229,6 +284,32 @@ public class GameJFrame extends JFrame implements KeyListener {
             data[x - 1][y] = 0;
             x--;
             initImage();
+        } else if (code == 65) {
+            initImage();
+        } else if (code == 87) {
+            data = new int[][]{
+                    {1, 2, 3, 4},
+                    {5, 6, 7, 8},
+                    {9, 10, 11, 12},
+                    {13, 14, 15, 0},
+            };
+            initImage();
         }
+    }
+
+    //判断data数组中的数据是否跟win数组是否相同
+    // 如果全部相同返回true，否则返回false。
+    public boolean victory() {
+        for (int i = 0; i < data.length; i++) {
+            // i:以此表示二维数组
+            // data[i]:依次表示每一个一维数组
+            for (int j = 0; j < data[i].length; j++) {
+                if (data[i][j] != win[i][j]) {
+                    //只要有一个数据不一样，返回false
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
