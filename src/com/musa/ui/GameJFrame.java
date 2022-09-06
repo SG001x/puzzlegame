@@ -4,6 +4,8 @@ import com.sun.jdi.PathSearchingVirtualMachine;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Random;
@@ -12,7 +14,7 @@ import java.util.Random;
 //目的：用于管理数据
 //加载图片的时候，会根据二维数组中的数据进行加载
 
-public class GameJFrame extends JFrame implements KeyListener {
+public class GameJFrame extends JFrame implements KeyListener, ActionListener {
     // 规定：GameJFrame代表游戏主界面
     int[][] data = new int[4][4];
 
@@ -34,6 +36,15 @@ public class GameJFrame extends JFrame implements KeyListener {
 
     //定义变量用来统计步数
     int step = 0;
+
+    //创建选项下面的条目对象
+    JMenuItem replayItem = new JMenuItem("重新游戏");
+    JMenuItem reLoginItem = new JMenuItem("重新登录");
+    JMenuItem closeItem = new JMenuItem("关闭游戏");
+
+    JMenuItem accountItem = new JMenuItem("制作人微信");
+    JMenuItem supportItem = new JMenuItem("打赏");
+
 
     public GameJFrame() {
         //初始化界面
@@ -76,10 +87,11 @@ public class GameJFrame extends JFrame implements KeyListener {
                 if (tempArr[i * 4 + j] == 0) {
                     x = i;
                     y = j;
-                } else {
-                    data[i][j] = tempArr[i * 4 + j];
-
                 }
+
+                data[i][j] = tempArr[i * 4 + j];
+
+
             }
         }
     }
@@ -87,13 +99,7 @@ public class GameJFrame extends JFrame implements KeyListener {
     //初始化图片
     // 添加图片的时候，就需要按照二维数组中管理的数据添加图片
     private void initImage() {
-        //路径分为两种：
-        // 绝对路径：一定是从盘符开始的
-        // 相对路径：相对当前项目而言的
-        // 实际开发时推荐写相对路径，因为相对路径在整个项目文件迁移至别的盘符、主机上时不会出错。
 
-        //细节：
-        // 先加载的图片在上方，后加图片在下。
 
         //清空已有图像
         this.getContentPane().removeAll();
@@ -105,6 +111,18 @@ public class GameJFrame extends JFrame implements KeyListener {
             this.getContentPane().add(winJLabel);
         }
 
+        JLabel stepCount = new JLabel("步数：" + step);
+        stepCount.setBounds(80, 100, 120, 20);
+        this.getContentPane().add(stepCount);
+
+
+        //路径分为两种：
+        // 绝对路径：一定是从盘符开始的
+        // 相对路径：相对当前项目而言的
+        // 实际开发时推荐写相对路径，因为相对路径在整个项目文件迁移至别的盘符、主机上时不会出错。
+
+        //细节：
+        // 先加载的图片在上方，后加图片在下。
 
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
@@ -153,13 +171,6 @@ public class GameJFrame extends JFrame implements KeyListener {
         JMenu functionJMenu = new JMenu("功能");
         JMenu aboutJMenu = new JMenu("关于我们");
 
-        //创建选项下面的条目对象
-        JMenuItem replayItem = new JMenuItem("重新游戏");
-        JMenuItem reLoginItem = new JMenuItem("重新登录");
-        JMenuItem closeItem = new JMenuItem("关闭游戏");
-
-        JMenuItem accountItem = new JMenuItem("制作人微信");
-        JMenuItem supportItem = new JMenuItem("打赏");
 
         //将每一个选项下面的条目添加到选项中
         functionJMenu.add(replayItem);
@@ -168,6 +179,15 @@ public class GameJFrame extends JFrame implements KeyListener {
 
         aboutJMenu.add(accountItem);
         aboutJMenu.add(supportItem);
+
+
+        //给条目绑定事件
+        replayItem.addActionListener(this);
+        reLoginItem.addActionListener(this);
+        closeItem.addActionListener(this);
+        accountItem.addActionListener(this);
+        supportItem.addActionListener(this);
+
 
         //将菜单里的两个选项添加到菜单中
         jMenuBar.add(functionJMenu);
@@ -238,6 +258,7 @@ public class GameJFrame extends JFrame implements KeyListener {
         if (victory()) {
             return;
         }
+
         //对上下左右进行判断
         //左：37   上：38   右：39   下：40。
         int code = e.getKeyCode();
@@ -252,6 +273,7 @@ public class GameJFrame extends JFrame implements KeyListener {
             data[x][y] = data[x][y + 1];
             data[x][y + 1] = 0;
             y++;
+            step++;
             initImage();
         } else if (code == 38) {
             if (x == 3) {
@@ -262,6 +284,7 @@ public class GameJFrame extends JFrame implements KeyListener {
             data[x][y] = data[x + 1][y];
             data[x + 1][y] = 0;
             x++;
+            step++;
             //调用方法按照最新的数字加载图片
             initImage();
         } else if (code == 39) {
@@ -273,6 +296,7 @@ public class GameJFrame extends JFrame implements KeyListener {
             data[x][y] = data[x][y - 1];
             data[x][y - 1] = 0;
             y--;
+            step++;
             initImage();
         } else if (code == 40) {
             if (x == 0) {
@@ -283,6 +307,7 @@ public class GameJFrame extends JFrame implements KeyListener {
             data[x][y] = data[x - 1][y];
             data[x - 1][y] = 0;
             x--;
+            step++;
             initImage();
         } else if (code == 65) {
             initImage();
@@ -311,5 +336,71 @@ public class GameJFrame extends JFrame implements KeyListener {
             }
         }
         return true;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        //获取当前被点击的条目对象
+        Object obj = e.getSource();
+        //判断
+        if (obj == replayItem) {
+            System.out.println("重新游戏");
+            //计步器清零
+            step = 0;
+            //再次打乱二维数组中的数据
+            initData();
+            //重新加载图片
+            initImage();
+        } else if (obj == reLoginItem) {
+            System.out.println("重新登录");
+            //关闭当前游戏界面
+            this.setVisible(false);
+            //打开登录界面
+            new LoginJFrame();
+        } else if (obj == closeItem) {
+            System.out.println("关闭游戏");
+            //直接关闭虚拟机即可
+            System.exit(0);
+        } else if (obj == accountItem) {
+            System.out.println("制作人微信");
+            //创建一个弹框对象
+            JDialog jDialog = new JDialog();
+            //创建一个管理图片的容器对象JLabel
+            JLabel jLabel = new JLabel(new ImageIcon("puzzlegame\\image\\制作人微信.jpg"));
+            //设置位置和宽高
+            jLabel.setBounds(0,0,500,500);
+            //把图片添加到弹框中
+            jDialog.getContentPane().add(jLabel);
+            //给弹框设置大小
+            jDialog.setSize(500,500);
+            //让弹窗置顶
+            jDialog.setAlwaysOnTop(true);
+            //让弹窗居中
+            jDialog.setLocationRelativeTo(null);
+            //弹窗关闭则无法操作下面的界面
+            jDialog.setModal(true);
+            //让弹窗显示出来
+            jDialog.setVisible(true);
+
+        } else if (obj == supportItem) {
+            //创建一个弹框对象
+            JDialog jDialog = new JDialog();
+            //创建一个管理图片的容器对象JLabel
+            JLabel jLabel = new JLabel(new ImageIcon("puzzlegame\\image\\打赏.jpg"));
+            //设置位置和宽高
+            jLabel.setBounds(0,0,447,696);
+            //把图片添加到弹框中
+            jDialog.getContentPane().add(jLabel);
+            //给弹框设置大小
+            jDialog.setSize(447,696);
+            //让弹窗置顶
+            jDialog.setAlwaysOnTop(true);
+            //让弹窗居中
+            jDialog.setLocationRelativeTo(null);
+            //弹窗关闭则无法操作下面的界面
+            jDialog.setModal(true);
+            //让弹窗显示出来
+            jDialog.setVisible(true);
+        }
     }
 }
